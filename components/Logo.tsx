@@ -2,7 +2,6 @@
 "use client"
 
 import React from "react"
-import type { LogoProps } from "../lib/types"
 
 const Logo: React.FC<LogoProps> = ({ fill = "#000", width = 60, height = 60 }) => {
   // Límites calculados de tus paths
