@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import { type ClassValue, clsx } from "clsx";
-import qs from "query-string";
+import qs from "qs";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -66,9 +66,9 @@ export const formatDateTime = (dateString: Date) => {
 };
 
 export function formatAmount(amount: number): string {
-  const formatter = new Intl.NumberFormat("en-US", {
+  const formatter = new Intl.NumberFormat("es-DO", {
     style: "currency",
-    currency: "USD",
+    currency: "DOP",
     minimumFractionDigits: 2,
   });
 
@@ -92,7 +92,7 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
 
   currentUrl[key] = value;
 
-  return qs.stringifyUrl(
+  return qs.stringify(
     {
       url: window.location.pathname,
       query: currentUrl,
