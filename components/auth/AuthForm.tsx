@@ -10,13 +10,14 @@ import z from 'zod'
 import FormComponent from './FormComponent'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signUp } from '@/lib/actions/user.actions'
+import { signIn, signUp } from '@/lib/actions/user.actions'
 
 
 const AuthForm = ({ type }: { type: string }) => {
 
   const router = useRouter();
   const [user, setUser] = useState(null)
+
   const values = (
     type === 'sign-in'
       ? { email: '', password: '' }
@@ -48,13 +49,11 @@ const AuthForm = ({ type }: { type: string }) => {
     try {
 
       if ( type === 'sign-in' ) {
-        {/** 
         const response = await signIn({
           email: data.email,
           password: data.password
         })
         if (response) router.push('/');
-        */}
       }
 
       if ( type === 'sign-up' ) {
