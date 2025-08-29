@@ -9,38 +9,63 @@ import { Form } from '../ui/form'
 import z from 'zod'
 import FormComponent from './FormComponent'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { signUp } from '@/lib/actions/user.actions'
 
 
 const AuthForm = ({ type }: { type: string }) => {
+
+  const router = useRouter();
   const [user, setUser] = useState(null)
+  const values = (
+    type === 'sign-in'
+      ? { email: '', password: '' }
+      : {
+          firstName: '',
+          lastName: '',
+          address: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          dob: '',
+          SSN: '',
+          email: '',
+          password: '',
+        }
+    )
   const [isLoading, setIsLoading] = useState(false)
 
   const formSchema = AuthFormSchema(type as 'sign-in' | 'sign-up');
 
-  const defaultValues =
-  type === 'sign-in'
-    ? { email: '', password: '' }
-    : {
-        firstName: '',
-        lastName: '',
-        address: '',
-        state: '',
-        postalCode: '',
-        dob: '',
-        SSN: '',
-        email: '',
-        password: '',
-      };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues
+    defaultValues: values
   })
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true)
-    console.log(values)
-    setIsLoading(false)
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+
+    try {
+
+      if ( type === 'sign-in' ) {
+        {/** 
+        const response = await signIn({
+          email: data.email,
+          password: data.password
+        })
+        if (response) router.push('/');
+        */}
+      }
+
+      if ( type === 'sign-up' ) {
+        const newUser = await signUp(data);
+        setUser(newUser);
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return <>

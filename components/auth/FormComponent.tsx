@@ -59,6 +59,13 @@ const FormComponent = ({ type, isLoading, form, onSubmit }: SignInComponentProps
               />
             </div>
             <CustomInput
+              name='city'
+              label='City'
+              type='text'
+              placeholder='Enter your city'
+              control={form.control}
+            />
+            <CustomInput
               name='address'
               label='Address'
               type='text'
@@ -70,7 +77,7 @@ const FormComponent = ({ type, isLoading, form, onSubmit }: SignInComponentProps
                 name='state'
                 label='State'
                 type='text'
-                placeholder='ex: San Cristobal'
+                placeholder='Ex: San Cristobal'
                 control={form.control}
               />
               <CustomInput
