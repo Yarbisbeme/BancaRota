@@ -209,6 +209,9 @@ export const AuthFormSchema = (type: 'sign-in' | 'sign-up') =>
     lastName: type === 'sign-in'
       ? z.string().optional()
       : z.string().min(3, { message: 'invalid last name'}),
+    city: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'invalid last name'}),
     address: type === 'sign-in'
       ? z.string().optional()
       : z.string().min(3, { message: 'invalid address'}),
