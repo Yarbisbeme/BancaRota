@@ -195,14 +195,33 @@ export const getTransactionStatus = (date: Date) => {
   return date > twoDaysAgo ? "Processing" : "Success";
 };
 
-export const AuthFormSchema = z.object({
-  email: z.email({
-    message: 'Please enter a valid email address',
-  }),
-  password: z.string()
-    .min(8, {
+export const AuthFormSchema = (type: 'sign-in' | 'sign-up') =>
+  z.object({
+    email: z.string().email({
+      message: 'Please enter a valid email address',
+    }),
+    password: z.string().min(8, {
       message: 'Password must be at least 8 characters long',
     }),
-  username: z.string()
-    .min(3, { message: 'Username must be at least 3 characters long'}),
-})
+    firstName: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'invalid first name'}),
+    lastName: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'invalid last name'}),
+    address: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'invalid address'}),
+    state: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'invalid state'}),
+    postalCode: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'Invalid Postal Code'}),
+    dob: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Invalid Date format (yyyy-mm-dd)' }),
+    SSN: type === 'sign-in'
+      ? z.string().optional()
+      : z.string().min(3, { message: 'Invalid SSN' }),
+  });

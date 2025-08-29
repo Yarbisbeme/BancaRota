@@ -1,4 +1,4 @@
-import { Control, FieldValues } from 'react-hook-form';
+import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import { 
   FormControl, 
   FormField, 
@@ -9,11 +9,11 @@ import { Input } from '../ui/input';
 import { AuthFormSchema } from '@/lib/utils';
 import { z } from 'zod';
 
-type AuthFormValues = z.infer<typeof AuthFormSchema>;
+const formSchema = AuthFormSchema('sign-in');
 
 interface CustomInputProps {
-  control: Control<AuthFormValues>; // ✅ aquí
-  name: keyof AuthFormValues;       // ✅ asegura que el nombre exista en el schema
+  control: Control<z.infer<typeof formSchema>>; // ✅ aquí
+  name: FieldPath<z.infer<typeof formSchema>>;       // ✅ asegura que el nombre exista en el schema
   type: string;
   label: string;
   placeholder: string;
@@ -36,7 +36,7 @@ const CustomInput = ({ control, name, type, label, placeholder }: CustomInputPro
                 {...field}
               />
             </FormControl>
-            <FormMessage className='mt-2'/>
+            <FormMessage className='mt-2 text-red-700'/>
           </div>
         </div>
       )}

@@ -9,7 +9,8 @@ import { AuthFormSchema } from '@/lib/utils'
 import { z } from 'zod'
 import Link from 'next/link'
 
-type AuthFormValues = z.infer<typeof AuthFormSchema>
+const formSchema = AuthFormSchema('sign-in')
+type AuthFormValues = z.infer<typeof formSchema>;
 
 interface SignInComponentProps {
   type: 'sign-in' | 'sign-up'
@@ -41,20 +42,77 @@ const FormComponent = ({ type, isLoading, form, onSubmit }: SignInComponentProps
           </>
         ) : (
           <>
+            <div className="flex gap-4">
+              <CustomInput
+                name='firstName'
+                label='First Name'
+                type='text'
+                placeholder='Enter your First Name'
+                control={form.control}
+              />
+              <CustomInput
+                name='lastName'
+                label='Last Name'
+                type='text'
+                placeholder='Enter your Last Name'
+                control={form.control}
+              />
+            </div>
             <CustomInput
-              name='username'
-              label='Username'
+              name='address'
+              label='Address'
               type='text'
-              placeholder='Enter your Username'
+              placeholder='Enter your Specific Address'
               control={form.control}
             />
-            <CustomInput
-              name='password'
-              label='Password'
-              type='password'
-              placeholder='Enter your Password'
-              control={form.control}
-            />
+            <div className="flex gap-4">
+              <CustomInput
+                name='state'
+                label='State'
+                type='text'
+                placeholder='ex: San Cristobal'
+                control={form.control}
+              />
+              <CustomInput
+                name='postalCode'
+                label='Postal Code'
+                type='text'
+                placeholder='Ex: 91001'
+                control={form.control}
+              />
+            </div>
+            <div className="flex gap-4">
+              <CustomInput
+                name='dob'
+                label='date of Birthday'
+                type='text'
+                placeholder='yyyy-mm-dd'
+                control={form.control}
+              />
+              <CustomInput
+                name='SSN'
+                label='SSN'
+                type='text'
+                placeholder='Enter your Username'
+                control={form.control}
+              />
+            </div>
+              <CustomInput
+                name='email'
+                label='Email'
+                type='text'
+                placeholder='Example@email.com'
+                control={form.control}
+              />
+              <CustomInput
+                name='password'
+                label='Password'
+                type='password'
+                placeholder='Enter your PassWord'
+                control={form.control}
+              />
+            <div className="flex gap-4">
+            </div>
           </>
         )}
 
