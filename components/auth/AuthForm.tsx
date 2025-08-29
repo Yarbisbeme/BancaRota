@@ -10,18 +10,34 @@ import z from 'zod'
 import FormComponent from './FormComponent'
 import Link from 'next/link'
 
-type AuthFormValues = z.infer<typeof AuthFormSchema>
 
 const AuthForm = ({ type }: { type: string }) => {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const form = useForm<AuthFormValues>({
-    resolver: zodResolver(AuthFormSchema),
-    defaultValues: { email: '', password: '' }
+  const formSchema = AuthFormSchema(type as 'sign-in' | 'sign-up');
+
+  const defaultValues =
+  type === 'sign-in'
+    ? { email: '', password: '' }
+    : {
+        firstName: '',
+        lastName: '',
+        address: '',
+        state: '',
+        postalCode: '',
+        dob: '',
+        SSN: '',
+        email: '',
+        password: '',
+      };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultValues
   })
 
-  const onSubmit = (values: AuthFormValues) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true)
     console.log(values)
     setIsLoading(false)
