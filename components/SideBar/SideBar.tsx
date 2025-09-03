@@ -7,7 +7,7 @@ import Logo from '../Logo'
 import { sidebarLinks } from '@/constants'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
-import { LogoutButton } from '../auth/LogOutButton'
+import { LogoutButton } from '../auth/SignOutBtn'
 
 const SideBar = ({ user }: SiderbarProps) => {
 
