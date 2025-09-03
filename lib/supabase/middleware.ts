@@ -55,20 +55,18 @@ export async function updateSession(request: NextRequest) {
             url.pathname = "/verify-email";
             return NextResponse.redirect(url);
         }
-        }
-
-    else {
-    if (
-        !request.nextUrl.pathname.startsWith("/signIn") &&
-        !request.nextUrl.pathname.startsWith("/signUp") &&
-        !request.nextUrl.pathname.startsWith("/verify-email") &&
-        !request.nextUrl.pathname.startsWith("/error")
-    ) {
-        const url = request.nextUrl.clone()
-        url.pathname = "/sign-in"
-        return NextResponse.redirect(url)
     }
-}
+    else {
+        if (
+            !request.nextUrl.pathname.startsWith("/signIn") &&
+            !request.nextUrl.pathname.startsWith("/signUp") &&
+            !request.nextUrl.pathname.startsWith("/verify-email")
+        ) {
+            const url = request.nextUrl.clone()
+            url.pathname = "/signIn"
+            return NextResponse.redirect(url)
+        }
+    }
 
     return supabaseResponse
 }
