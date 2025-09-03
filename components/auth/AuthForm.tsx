@@ -1,96 +1,52 @@
-"use client";
+'use client'
 
 import { useState } from "react";
 import LogoHorizon from "../LogoHorizon";
+import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AuthFormSchema } from "@/lib/utils";
-import FormComponent from "./FormComponent";
-import { useRouter } from "next/navigation";
-import { account, ID } from "@/lib/appwrite";
-import { Models } from "appwrite";
-import z, { email, string } from "zod";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, Form, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
+import CustomInput from "./CustomInput";
+import { authFormSchema } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { signIn, signUp } from "@/lib/Actions";
 
 interface AuthFormProps {
   type: "sign-in" | "sign-up";
 }
 
 const AuthForm = ({ type }: AuthFormProps) => {
-  const router = useRouter();
+
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
 
-  const values =
-    type === "sign-in"
-      ? { email: "", password: "" }
-      : {
-          firstName: "",
-          lastName: "",
-          address: "",
-          city: "",
-          state: "",
-          postalCode: "",
-          dob: "",
-          SSN: "",
-          email: "",
-          password: "",
-        };
-
-  const formSchema = AuthFormSchema(type);
+  const formSchema = authFormSchema(type)
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: values,
-  });
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    dateOfBirth: "",
+    ssn: ""
+  },
+})
 
-  const login = async ({email, password}: {email: string, password: string}) => {
-    setIsLoading(true)
-    try {
-      await account.deleteSession("current").catch(() => {console.log('Se ha cerrado la sesion')});
-      await account.createEmailPasswordSession(email, password);
 
-      const user = await account.get();
-      setLoggedInUser(user);
-      console.log(user)
-      router.push('/')
-    } catch (error: any) {
-      if (error.code === 401) {
-        console.error("Credenciales Invalidas")
-        alert("El correo o la Clave son incorrectas")
-      } else {
-        console.error("Error inesperado", error)
-        alert("Ha Ocurrido un error intenta nuevamente")
-      }
-
-    }finally{
-      setIsLoading(false)
-    }
-  }
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    try {
-      if (type === "sign-in") {
-        await login({ email: data.email, password: data.password });
-      }
-
-      if (type === "sign-up") {
-        // crear usuario
-        await account.create(
-          ID.unique(),
-          data.email,
-          data.password,
-          `${data.firstName} ${data.lastName}`
-        );
-
-        await login({ email: data.email, password: data.password });
-      }
-    } catch (error) {
-      console.error("Error en submit:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    console.log(values)
+    setIsLoading(false);
+  }
 
   return (
     <section className="auth-form">
@@ -98,20 +54,133 @@ const AuthForm = ({ type }: AuthFormProps) => {
         <LogoHorizon />
         <div className="flex flex-col gap-1 md:gap-3">
           <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
-            {type === "sign-in" ? "Sign In" : "Sign Up"}
+            {user 
+              ? 'Link Account' 
+              : type === 'sign-in'
+                ? 'Sign In'
+                : 'Sign Up'
+            }
           </h1>
-          <p className="text-16 font-normal text-gray-600">
-            Please enter your details below
+          <p>
+            {user 
+              ? 'Link your account to get started'
+              : 'Please enter your details'
+            }
           </p>
         </div>
       </header>
+      {
+        user 
+        ? (
+          <div className="flex flex-col gap-4">
+            {/** PlaidLink */}
+          </div>
+        )
+        : <><Form {...form}>
+            <form action={type === 'sign-in' ? signIn : signUp} className="space-y-8">
+              {type === 'sign-up' &&
+              <>
+                <div className="flex flex-row gap-4">
+                  <CustomInput 
+                    control={form.control} 
+                    name={'firstName'} 
+                    label={'First Name'} 
+                    placeholder={'Enter Your First Name'}
+                  />
+                  <CustomInput 
+                    control={form.control} 
+                    name={'lastName'} 
+                    label={'Last Name'} 
+                    placeholder={'Enter your last name'}
+                  />
+                </div>
+                <CustomInput 
+                    control={form.control} 
+                    name={'address'} 
+                    label={'Address'} 
+                    placeholder={'Enter your Address'}
+                  />
+                <CustomInput 
+                  control={form.control} 
+                  name={'city'} 
+                  label={'City'} 
+                  placeholder={'Enter your City'}
+                />
+                <div className="flex flex-row gap-4">
+                  <CustomInput 
+                    control={form.control} 
+                    name={'state'} 
+                    label={'State'} 
+                    placeholder={'Ex: NY'}
+                  />
+                  <CustomInput 
+                    control={form.control} 
+                    name={'postalCode'} 
+                    label={'Postal Code'} 
+                    placeholder={'Ex: 91001'}
+                  />
+                </div>
+                <div className="flex flex-row gap-4">
+                  <CustomInput 
+                    control={form.control} 
+                    name={'dateOfBirth'} 
+                    label={'Date of birth'} 
+                    placeholder={'2003-08-06'}
+                  />
+                  <CustomInput 
+                    control={form.control} 
+                    name={'ssn'} 
+                    label={'SSN'} 
+                    placeholder={'Ex: 1234'}
+                  />
+                </div>
+              </>
+              }
+              <CustomInput 
+                control={form.control} 
+                name={'email'} 
+                label={'Email'} 
+                placeholder={'Enter your Username'}
+              />
+              <CustomInput 
+                control={form.control} 
+                name={'password'} 
+                label={'Password'} 
+                placeholder={'Enter your Password'}
+              />
+              <div className="flex flex-col gap-4">
+                <Button type="submit" className="form-btn" disabled={isLoading}>
+                  {
+                    isLoading 
+                      ? (
+                        <>
+                          <Loader2 size={20} className="animate-spin"/> &nbsp; Loading...
+                        </>
+                      )
+                      : type === 'sign-in'
+                        ? 'Sign In' 
+                        : 'Sign Up'
+                  }
+                </Button>
+              </div>
 
-      <FormComponent
-        type={type}
-        isLoading={isLoading}
-        form={form}
-        onSubmit={onSubmit}
-      />
+            </form>
+          </Form>
+
+          <footer className="flex justify-center gap-1">
+            <p className="text-14 font-normal text-gray-600">
+              {type === 'sign-in'
+                ? "Don't have an account?"
+                : "Already have an account?"
+              }
+            </p>
+            <Link href={type === 'sign-in' ? '/signUp': '/signIn'} className="form-link">
+              {type === 'sign-in' ? 'Sign Up': 'Sign In'}
+            </Link>
+          </footer>
+        </>
+      }
+
     </section>
   );
 };

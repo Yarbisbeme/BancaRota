@@ -8,15 +8,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const logedIn = { 
-    firstName: 'Yarbis', 
-    lastName: 'Beltré Mercedes',
-    email: 'yarbisbeme@gmail.com',
-  };
-
   return (
     <main className="flex min-h-screen w-full font-inter">
-      <SideBar user={logedIn.firstName}/>
+      {/**<SideBar user={}/>*/}
       <div className="flex flex-col size-full">
         <div className="root-layout">
           <Image 
@@ -26,7 +20,7 @@ export default function RootLayout({
             height={30} 
           />
           <div>
-            <MobileNav user={logedIn} />
+            {/** <MobileNav user={{}} /> */}
           </div>
         </div>
       {children}
