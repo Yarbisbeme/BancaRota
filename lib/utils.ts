@@ -2,7 +2,7 @@
 import { type ClassValue, clsx } from "clsx";
 import qs from "qs";
 import { twMerge } from "tailwind-merge";
-import z from "zod";
+import z, { email } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -195,36 +195,26 @@ export const getTransactionStatus = (date: Date) => {
   return date > twoDaysAgo ? "Processing" : "Success";
 };
 
-export const AuthFormSchema = (type: 'sign-in' | 'sign-up') =>
-  z.object({
-    email: z.string().email({
-      message: 'Please enter a valid email address',
-    }),
-    password: z.string().min(8, {
-      message: 'Password must be at least 8 characters long',
-    }),
-    firstName: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'invalid first name'}),
-    lastName: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'invalid last name'}),
-    city: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'invalid last name'}),
-    address: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'invalid address'}),
-    state: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'invalid state'}),
-    postalCode: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'Invalid Postal Code'}),
-    dob: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Invalid Date format (yyyy-mm-dd)' }),
-    SSN: type === 'sign-in'
-      ? z.string().optional()
-      : z.string().min(3, { message: 'Invalid SSN' }),
-  });
+export const authFormSchema = (type: string) => z.object({
+  firstName:  type === 'sign-in' ? z.string().optional() : z.string().min(3).max(50),
+  lastName:  type === 'sign-in' ? z.string().optional() : z.string().min(3).max(50),
+  address:  type === 'sign-in' ? z.string().optional() : z.string().max(50),
+  city: type === 'sign-in' ? z.string().optional() :  z.string().min(3),
+  state:  type === 'sign-in' ? z.string().optional() : z.string().min(3),
+  postalCode:  type === 'sign-in' ? z.string().optional() : z.string().min(3).max(9),
+  dateOfBirth:  type === 'sign-in' ? z.string().optional() : z.string().min(3),
+  ssn:  type === 'sign-in' ? z.string().optional() : z.string(),
+  // sign In
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+export const Env = () => {
+  const ProjectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const ProjectKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  return {
+    ProjectUrl,
+    ProjectKey
+  }
+}

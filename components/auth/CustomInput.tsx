@@ -1,47 +1,42 @@
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
-import { 
-  FormControl, 
-  FormField, 
-  FormLabel, 
-  FormMessage
-} from '../ui/form';
-import { Input } from '../ui/input';
-import { AuthFormSchema } from '@/lib/utils';
-import { z } from 'zod';
+import React from 'react'
+import { FormControl, FormField, FormLabel, FormMessage } from '../ui/form'
+import { Input } from '../ui/input'
+import { Control, FieldPath } from 'react-hook-form'
+import z from 'zod'
+import { authFormSchema } from '@/lib/utils'
 
-const formSchema = AuthFormSchema('sign-in');
+const formSchema = authFormSchema('sign-up')
 
-interface CustomInputProps {
-  control: Control<z.infer<typeof formSchema>>; // ✅ aquí
-  name: FieldPath<z.infer<typeof formSchema>>;       // ✅ asegura que el nombre exista en el schema
-  type: string;
-  label: string;
-  placeholder: string;
+interface CustomInput {
+    control: Control<z.infer<typeof formSchema>>,
+    name: FieldPath<z.infer<typeof formSchema>>,
+    placeholder: string,
+    label: string,
 }
 
-const CustomInput = ({ control, name, type, label, placeholder }: CustomInputProps) => {
+const CustomInput = ( {control, name, placeholder, label}: CustomInput ) => {
   return (
     <FormField
-      control={control}
-      name={name}   // react-hook-form espera string
-      render={({ field }) => (  
-        <div className='form-item'>
-          <FormLabel className='form-label'>{label}</FormLabel>
-          <div className="flex w-full flex-col">
-            <FormControl>
-              <Input
-                placeholder={placeholder}
-                className='input-class'
-                type={type}
-                {...field}
-              />
-            </FormControl>
-            <FormMessage className='mt-2 text-red-700'/>
-          </div>
-        </div>
-      )}
+        control={control}
+        name={name}
+        render={({field}) => (
+            <div className="form-item">
+            <FormLabel className="form-label"> {label} </FormLabel>
+            <div className="flex w-full flex-col">
+                <FormControl>
+                <Input
+                    placeholder={placeholder}
+                    className="input-class"
+                    type={name === 'password' ? 'password' : 'text'}
+                    {...field}
+                />
+                </FormControl>
+                <FormMessage className="mt-2 form-message"/>
+            </div>
+            </div>
+        )}
     />
-  );
-};
+  )
+}
 
-export default CustomInput;
+export default CustomInput
