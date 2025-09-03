@@ -1,18 +1,20 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LogoHorizon from "../LogoHorizon";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, Form, FormMessage } from "../ui/form";
-import { Input } from "../ui/input";
+import { Form } from "../ui/form";
 import CustomInput from "./CustomInput";
 import { authFormSchema } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { signIn, signUp } from "@/lib/Actions";
+import { motion, AnimatePresence } from "framer-motion"
+import { X } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 interface AuthFormProps {
   type: "sign-in" | "sign-up";
@@ -22,36 +24,107 @@ const AuthForm = ({ type }: AuthFormProps) => {
 
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
   const formSchema = authFormSchema(type)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
-  resolver: zodResolver(formSchema),
-  defaultValues: {
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    dateOfBirth: "",
-    ssn: ""
-  },
-})
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      address: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      dateOfBirth: "",
+      ssn: ""
+    },
+  })
 
+  useEffect(() => {
+    if (error) {
+      form.reset()
+      const timer = setTimeout(() => {
+        setError(null)
+         // limpia todos los inputs
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error, form])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    console.log(values)
-    setIsLoading(false);
+async function handleSignIn(values: z.infer<typeof formSchema>) {
+  setIsLoading(true);
+  const formData = new FormData();
+  Object.entries(values).forEach(([key, value]) => {
+    formData.append(key, value as string);
+  });
+
+  const result = await signIn(formData);
+  if (result?.success === false) {
+    setError(result.message);
   }
+  setIsLoading(false);
+}
+
+async function handleSignUp(values: z.infer<typeof formSchema>) {
+  setIsLoading(true);
+  const formData = new FormData();
+  Object.entries(values).forEach(([key, value]) => {
+    formData.append(key, value as string);
+  });
+
+  const result = await signUp(formData);
+  setIsLoading(false);
+
+  if (result?.success) {
+    setError(result.message);
+    router.push('/verify-email')
+  } else {
+    setError(result.message);
+  }
+}
+
 
   return (
+    
     <section className="auth-form">
+      
       <header className="flex flex-col gap-5 md:gap-8">
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-4 z-50 w-[90%] max-w-md"
+            >
+              <div className="flex items-center justify-between p-4 text-sm text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50 shadow-md">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 shrink-0"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                  </svg>
+                  <span>{error}</span>
+                </div>
+                <button onClick={() => { setError(null); form.reset() }}>
+                  <X size={18} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <LogoHorizon />
+
         <div className="flex flex-col gap-1 md:gap-3">
           <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
             {user 
@@ -77,7 +150,12 @@ const AuthForm = ({ type }: AuthFormProps) => {
           </div>
         )
         : <><Form {...form}>
-            <form action={type === 'sign-in' ? signIn : signUp} className="space-y-8">
+            <form
+                onSubmit={form.handleSubmit(
+                  type === "sign-in" ? handleSignIn : handleSignUp
+                )}
+                className="space-y-8"
+            >
               {type === 'sign-up' &&
               <>
                 <div className="flex flex-row gap-4">
@@ -150,18 +228,18 @@ const AuthForm = ({ type }: AuthFormProps) => {
               />
               <div className="flex flex-col gap-4">
                 <Button type="submit" className="form-btn" disabled={isLoading}>
-                  {
-                    isLoading 
-                      ? (
-                        <>
-                          <Loader2 size={20} className="animate-spin"/> &nbsp; Loading...
-                        </>
-                      )
-                      : type === 'sign-in'
-                        ? 'Sign In' 
-                        : 'Sign Up'
+                  {isLoading 
+                    ? (
+                      <>
+                        <Loader2 size={20} className="animate-spin"/> &nbsp; Loading...
+                      </>
+                    )
+                    : type === 'sign-in'
+                      ? 'Sign In'
+                      : 'Sign Up'
                   }
                 </Button>
+
               </div>
 
             </form>
