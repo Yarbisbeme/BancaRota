@@ -1,11 +1,9 @@
-/* eslint-disable no-unused-vars */
 
 declare type SearchParamProps = {
   params: { [key: string]: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-// ========================================
 
 declare type LogoProps = {
     fill?: string;
@@ -186,15 +184,6 @@ declare interface PlaidLinkProps {
   dwollaCustomerId?: string;
 }
 
-// declare type User = sdk.Models.Document & {
-//   accountId: string;
-//   email: string;
-//   name: string;
-//   items: string[];
-//   accessToken: string;
-//   image: string;
-// };
-
 declare interface AuthFormProps {
   type: "sign-in" | "sign-up";
 }
@@ -263,7 +252,7 @@ declare interface PaymentTransferFormProps {
   accounts: Account[];
 }
 
-// Actions
+
 declare interface getAccountsProps {
   userId: string;
 }
@@ -281,10 +270,10 @@ declare interface getTransactionsProps {
 }
 
 declare interface CreateFundingSourceOptions {
-  customerId: string; // Dwolla Customer ID
-  fundingSourceName: string; // Dwolla Funding Source Name
-  plaidToken: string; // Plaid Account Processor Token
-  _links: object; // Dwolla On Demand Authorization Link
+  customerId: string; 
+  fundingSourceName: string; 
+  plaidToken: string; 
+  _links: object; 
 }
 
 declare interface CreateTransactionProps {
