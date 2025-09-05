@@ -31,20 +31,19 @@ declare type LoginUser = {
 };
 
 declare type User = {
-  $id: string;
+  user_id: string;
   email: string;
-  userId: string;
-  dwollaCustomerUrl: string;
-  dwollaCustomerId: string;
+  dwollaCustomerUrl?: string;
+  dwollaCustomerId?: string;
   firstName: string;
   lastName: string;
-  name: string;
   address: string;
   city: string;
   state: string;
   postalCode: string;
-  dateOfBirth: string;
+  dayOfBirth: string;
   ssn: string;
+  created_at: string;
 };
 
 declare type NewUserParams = {
