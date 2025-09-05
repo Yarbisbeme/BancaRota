@@ -10,9 +10,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  const loggedIn = await getUser();
+
   return (
     <main className="flex min-h-screen w-full font-inter">
-      {/**<SideBar user={}/>*/}
+      <SideBar user={loggedIn}/>
       <div className="flex flex-col size-full">
         <div className="root-layout">
           <Image 
@@ -22,7 +24,7 @@ export default async function RootLayout({
             height={30} 
           />
           <div>
-            {/** <MobileNav user={{}} /> */}
+            <MobileNav user={loggedIn} />
           </div>
         </div>
       {children}

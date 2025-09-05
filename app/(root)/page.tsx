@@ -1,17 +1,33 @@
-import { LogoutButton } from '@/components/auth/SignOutBtn'
-import { LogoYBank } from '@/components/LogoYBank'
-import { getUser } from '@/lib/Actions'
+import HeaderBox from '@/components/HeaderBox'
+import RightSidebar from '@/components/SideBar/RightSidebar';
+import TotalBalanceBox from '@/components/TotalBalanceBox';
+import { getUser } from '@/lib/Actions';
 
-export default async function Home() {
-  // Trae al usuario desde la DB (servidor)
-  const user = await getUser()
+const Home = async () => {
+  
+  const loggedIn = await getUser();
 
   return (
-    <section className='w-full flex-col mt-4 space-y-6 p-8'>
-      <LogoYBank />
-      <p>Hello {user.firstName} {user.lastName}</p>
-      <p>Vives en {user.address}</p>
-      <LogoutButton />
+    <section className="home">
+      <div className="home-content">
+        <header className="home-header">
+          <HeaderBox 
+            type="greeting"
+            title="Welcome"
+            user={loggedIn?.firstName || 'Guest'}
+            subtext="Access and manage your account and transactions efficiently."
+          />
+
+        </header>
+      </div>
+
+      <RightSidebar 
+        user={loggedIn}
+        transactions={[]}
+        banks={[]}
+      />
     </section>
   )
 }
+
+export default Home
