@@ -3,11 +3,18 @@
 import { createClient } from "./supabase/server"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { promises } from "dns"
 
+{/** 
 const baseUrl =
   process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_BASE_URL_PROD
-    : process.env.VERCEL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+    : process.env.NODE_ENV === 'development'
+      ? process.env.NEXT_PUBLIC_BASE_URL_DEV
+      : process.env.NEXT_PUBLIC_BASE_URL_PREVIEW
+*/}
+
+const baseUrl = process.env.NEXT_PUBLIC_URL_Local
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
@@ -55,19 +62,20 @@ export async function signUp(formData: FormData) {
   }
 
   const {error: insertError} = await supabase.from("usuarios").insert({
-    id: data.user.id,
-    first_name: firstName,
-    last_name: lastName,
-    address,
-    city,
-    state,
-    postal_code: postalCode,
-    date_of_birth: dateOfBirth,
-    ssn,
+    user_id: data.user.id,
+    email: email,
+    firstName: firstName,
+    lastName: lastName,
+    address: address,
+    city: city,
+    state: state,
+    postalCode: postalCode,
+    dateOfBirth: dateOfBirth,
+    ssn: ssn,
   })
 
   if (insertError) {
-    return { success: false, message: "El usuario ya existe" }
+    return { success: false, message: insertError.message }
   }
 
   return { success: true, message: "Usuario registrado, revisa tu correo para confirmar" };
@@ -114,23 +122,33 @@ export async function updatePassword(password: string) {
   return {message: 'Todo Bien', success: true}
 }
 
-export async function getUser() {
-  const supabase = await createClient();
+export async function getUser(): Promise<User> {
+  const supabase = await createClient()
 
-  const {data, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !data.session?.user ) {
-    redirect('/signIn');
+  // Recupera sesión
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    console.log("⚠️ No hay sesión:", error)
+    redirect("/signIn")
   }
 
-  const userId = data.session.user.id
+  // Busca en tu tabla `usuarios`
+  const { data: userData, error: userError } = await supabase
+    .from("usuarios")
+    .select("*")
+    .eq("user_id", user.id)
+    .single<User>() // 👈 en vez de .single()
 
-  const { data: userData, error: userError  } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('id', userId)
-    .single()
+  if (userError) {
+    redirect("/signIn")
+  }
 
-  if (userError || !userData) redirect('/signIn')
-
-  return userData;
+  if (!userData) {
+    redirect("/verify-email") // o donde quieras mandarlo
+  }
+  console.log('Datos del usuario obtenidos: ')
+  console.log('----------------------------------------------------')
+  console.log(userData)
+  return userData
 }

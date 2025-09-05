@@ -1,21 +1,17 @@
 import { LogoutButton } from '@/components/auth/SignOutBtn'
 import { LogoYBank } from '@/components/LogoYBank'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getUser } from '@/lib/Actions'
 
-export default async function PrivatePage() {
-  const supabase = await createClient()
+export default async function Home() {
+  // Trae al usuario desde la DB (servidor)
+  const user = await getUser()
 
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect('/signIn')
-  }
-
-  return <>
+  return (
     <section className='w-full flex-col mt-4 space-y-6 p-8'>
       <LogoYBank />
-      <p>Hello {data.user.email}</p>
+      <p>Hello {user.firstName} {user.lastName}</p>
+      <p>Vives en {user.address}</p>
       <LogoutButton />
     </section>
-  </>
+  )
 }
