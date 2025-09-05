@@ -27,13 +27,13 @@ const MobileNav = ({ user }: MobileNavProps ) => {
           <SheetTitle>
             <Link href={'/'} className="cursor-pointer items-center gap-2 flex">
                 <Image 
-                    src={'/icons/logo.svg'} 
+                    src={'/icons/logoY.svg'} 
                     alt="Logo" 
                     width={32} 
                     height={32} 
                     className='max-lg:size-8'
                 />
-                <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1'>Horizon</h1>
+                <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1 -ml-2'>Bank</h1>
             </Link>
           </SheetTitle>
           <div className="mobilnav-sheet">
