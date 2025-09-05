@@ -1,72 +1,75 @@
-//middleware.ts
-
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { Env } from "../utils";
 import { createServerClient } from "@supabase/ssr";
+import { Env } from "../utils";
 
-const { ProjectKey, ProjectUrl } = Env()
+const { ProjectKey, ProjectUrl } = Env();
 
 export async function updateSession(request: NextRequest) {
-    
-    let supabaseResponse = NextResponse.next({
-        request,
-    })
+    const response = NextResponse.next({ request });
 
-    const supabase = createServerClient(
-        ProjectUrl,
-        ProjectKey, 
-        {
-            cookies: {
-                getAll(){
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({name, value}) => request.cookies.set(name, value))
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
-                    cookiesToSet.forEach(({name, value, options}) => {
-                        supabaseResponse.cookies.set(name, value, options);
-                    })
-                }
-            }
-        }
-    )
+    // Crear cliente de Supabase en el server con cookies
+    const supabase = createServerClient(ProjectUrl, ProjectKey, {
+        cookies: {
+            getAll() {
+                return request.cookies.getAll();
+            },
+            setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) => {
+                    response.cookies.set(name, value, options);
+                });
+            },
+        },
+    });
 
-    const { data: {user} } = await supabase.auth.getUser();
+    // Obtener información del usuario
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
 
+    const pathname = request.nextUrl.pathname;
+
+    // USUARIO LOGUEADO
     if (user) {
-        // Bloquear acceso a signIn y signUp si ya hay usuario
+        // Bloquear acceso a signIn, signUp y verify-email si ya está logueado
         if (
-            request.nextUrl.pathname.startsWith("/signIn") ||
-            request.nextUrl.pathname.startsWith("/signUp") ||
-            request.nextUrl.pathname.startsWith("/verify-email") ||
-            request.nextUrl.pathname.startsWith("/error") 
+            pathname.startsWith("/signIn") ||
+            pathname.startsWith("/signUp") ||
+            pathname.startsWith("/verify-email")
         ) {
             const url = request.nextUrl.clone();
             url.pathname = "/";
             return NextResponse.redirect(url);
         }
 
-        // Si no está confirmado, mandarlo a verify-email
-        if (!user.confirmed_at && 
-            !request.nextUrl.pathname.startsWith("/verify-email")) {
+        // Usuario no confirmado → redirigir a verify-email
+        if (!user.confirmed_at && !pathname.startsWith("/verify-email")) {
             const url = request.nextUrl.clone();
             url.pathname = "/verify-email";
             return NextResponse.redirect(url);
         }
-    }
-    else {
-        if (
-            !request.nextUrl.pathname.startsWith("/signIn") &&
-            !request.nextUrl.pathname.startsWith("/signUp") &&
-            !request.nextUrl.pathname.startsWith("/verify-email")
-        ) {
-            const url = request.nextUrl.clone()
-            url.pathname = "/signIn"
-            return NextResponse.redirect(url)
-        }
+
+        // Si está confirmado y todo ok → dejar pasar
+        return response;
     }
 
-    return supabaseResponse
+    // USUARIO NO LOGUEADO
+    if (!user) {
+        // Permitimos entrar a /signIn, /signUp, /verify-email
+        if (
+            pathname.startsWith("/signIn") ||
+            pathname.startsWith("/signUp") ||
+            pathname.startsWith("/verify-email") ||
+            pathname.startsWith("/forgot-password") ||
+            pathname.startsWith("/update-password") 
+        ) {
+            return response;
+        }
+
+        // Cualquier otra ruta → redirigir a /signIn
+        const url = request.nextUrl.clone();
+        url.pathname = "/signIn";
+        return NextResponse.redirect(url);
+    } 
+
+    return response;
 }
