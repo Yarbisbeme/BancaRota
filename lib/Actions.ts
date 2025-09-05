@@ -4,12 +4,7 @@ import { createClient } from "./supabase/server"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-const baseUrl =
-  process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_BASE_URL_PROD
-    : process.env.NODE_ENV === 'development'
-      ? process.env.NEXT_PUBLIC_BASE_URL_DEV
-      : process.env.NEXT_PUBLIC_BASE_URL_PREVIEW
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_DEV
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
