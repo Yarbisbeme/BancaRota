@@ -109,3 +109,24 @@ export async function updatePassword(password: string) {
   }
   return {message: 'Todo Bien', success: true}
 }
+
+export async function getUser() {
+  const supabase = await createClient();
+
+  const {data, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !data.session?.user ) {
+    redirect('/signIn');
+  }
+
+  const userId = data.session.user.id
+
+  const { data: userData, error: userError  } = await supabase
+    .from('usuarios')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (userError || !userData) redirect('/signIn')
+
+  return userData;
+}
