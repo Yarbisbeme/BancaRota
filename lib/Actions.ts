@@ -92,9 +92,12 @@ export async function forgotPassword(email: string): Promise<{success: boolean, 
     if (error) 
       return { success: false, message: error?.message && "Ha ocurrido un error al intentar resetear el password" };
     return { success: true, message: 'Todo correcto' }
-  } catch (error: any) {
-    console.log(error);
-    return { success: false, message: error || "Ha ocurrido un error inesperado" }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, message: error.message }
+    } else{
+      return { success: false, message: "Ha ocurrido un error inesperado" };
+    }
   }
 }
 
