@@ -6,7 +6,7 @@ import { Env } from "../utils";
 const { ProjectKey, ProjectUrl } = Env();
 
 export async function updateSession(request: NextRequest) {
-    let response = NextResponse.next({ request });
+    const response = NextResponse.next({ request });
 
     // Crear cliente de Supabase en el server con cookies
     const supabase = createServerClient(ProjectUrl, ProjectKey, {

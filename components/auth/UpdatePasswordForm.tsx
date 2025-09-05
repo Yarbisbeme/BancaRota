@@ -10,7 +10,6 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
-import { signOut } from '@/lib/Actions'
 
 const supabase = createClient()
 
@@ -54,8 +53,12 @@ const UpdatePasswordForm = () => {
         setTimeout(() => {
           router.push('/signIn')}, 3000)
       }
-    } catch (err: any) {
-      setError(err.message || 'Ha ocurrido un error inesperado.')
+    }  catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError('Ha ocurrido un error inesperado.')
+        }
     } finally {
       setIsLoading(false)
     }
@@ -97,7 +100,14 @@ const UpdatePasswordForm = () => {
         </div>
 
         <Button type='submit' className='mt-4 form-btn' disabled={disabled || isLoading}>
-          {isLoading ? 'Updating...' : 'Update Password'}
+          {isLoading ? (
+            <>
+              <Loader2 size={20} className="animate-spin mr-2" />
+              Updating...
+            </>
+          ) : (
+            'Update Password'
+          )}
         </Button>
       </form>
 
