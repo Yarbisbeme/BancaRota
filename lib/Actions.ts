@@ -3,7 +3,11 @@
 import { createClient } from "./supabase/server"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { success } from "zod"
+
+const baseUrl =
+  process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_BASE_URL_PROD
+    : process.env.VERCEL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
@@ -42,7 +46,7 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_URL_LOCAL}/`
+      emailRedirectTo: `${baseUrl}/`
     }
   })
 
@@ -87,7 +91,7 @@ export async function forgotPassword(email: string): Promise<{success: boolean, 
   const supabase = await createClient();
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_URL_LOCAL}/update-password`
+      redirectTo: `${baseUrl}/update-password`
     })
     if (error) 
       return { success: false, message: error?.message && "Ha ocurrido un error al intentar resetear el password" };
