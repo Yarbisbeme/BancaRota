@@ -7,7 +7,9 @@ import { revalidatePath } from "next/cache"
 const baseUrl =
   process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_BASE_URL_PROD
-    : process.env.VERCEL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+    : process.env.NODE_ENV === 'development'
+      ? process.env.NEXT_PUBLIC_BASE_URL_DEV
+      : process.env.NEXT_PUBLIC_BASE_URL_PREVIEW
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
