@@ -1,13 +1,9 @@
 "use server"
 
-//actions.ts
-
 import { createClient } from "./supabase/server"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { Console } from "console"
 import { success } from "zod"
-import { form } from "framer-motion/client"
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
@@ -45,6 +41,9 @@ export async function signUp(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_URL_LOCAL}/`
+    }
   })
 
   if (error || !data.user) {
@@ -64,7 +63,7 @@ export async function signUp(formData: FormData) {
   })
 
   if (insertError) {
-    return { success: false, message: insertError.message }
+    return { success: false, message: "El usuario ya existe" }
   }
 
   return { success: true, message: "Usuario registrado, revisa tu correo para confirmar" };
@@ -82,4 +81,28 @@ export async function signOut() {
 
     revalidatePath("/", "layout")
     redirect("/signIn")
+}
+
+export async function forgotPassword(email: string): Promise<{success: boolean, message: string}> {
+  const supabase = await createClient();
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_URL_LOCAL}/update-password`
+    })
+    if (error) 
+      return { success: false, message: error?.message && "Ha ocurrido un error al intentar resetear el password" };
+    return { success: true, message: 'Todo correcto' }
+  } catch (error: any) {
+    console.log(error);
+    return { success: false, message: error || "Ha ocurrido un error inesperado" }
+  }
+}
+
+export async function updatePassword(password: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({password})
+  if (error) {
+    return {message: error.message || "Error Desconocido", success: false}
+  }
+  return {message: 'Todo Bien', success: true}
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import LogoHorizon from "../LogoHorizon";
+import { LogoYBank } from "../LogoYBank";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ import { signIn, signUp } from "@/lib/Actions";
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { useRouter } from "next/navigation";
+import Message from "../Message";
 
 interface AuthFormProps {
   type: "sign-in" | "sign-up";
@@ -25,8 +26,10 @@ const AuthForm = ({ type }: AuthFormProps) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const formSchema = authFormSchema(type)
   const router = useRouter()
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,11 +52,11 @@ const AuthForm = ({ type }: AuthFormProps) => {
       form.reset()
       const timer = setTimeout(() => {
         setError(null)
-         // limpia todos los inputs
+        setMessage(null)
       }, 5000)
       return () => clearTimeout(timer)
     }
-  }, [error, form])
+  }, [error, form, message])
 
 async function handleSignIn(values: z.infer<typeof formSchema>) {
   setIsLoading(true);
@@ -80,50 +83,27 @@ async function handleSignUp(values: z.infer<typeof formSchema>) {
   setIsLoading(false);
 
   if (result?.success) {
-    setError(result.message);
+    setMessage(result.message);
     router.push('/verify-email')
   } else {
     setError(result.message);
+    console.log(result.message);
   }
 }
-
 
   return (
     
     <section className="auth-form">
       
       <header className="flex flex-col gap-5 md:gap-8">
-
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-4 z-50 w-[90%] max-w-md"
-            >
-              <div className="flex items-center justify-between p-4 text-sm text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50 shadow-md">
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5 shrink-0"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                  </svg>
-                  <span>{error}</span>
-                </div>
-                <button onClick={() => { setError(null); form.reset() }}>
-                  <X size={18} />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <LogoHorizon />
+        {error && 
+          <Message color="red" value={error} onClick={() => {setError(null); form.reset();}}/>
+        }
+        {
+          message &&
+          <Message value={message} onClick={() => {setMessage(null); form.reset();}}/>
+        }
+        <LogoYBank />
 
         <div className="flex flex-col gap-1 md:gap-3">
           <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
@@ -150,100 +130,111 @@ async function handleSignUp(values: z.infer<typeof formSchema>) {
           </div>
         )
         : <><Form {...form}>
-            <form
-                onSubmit={form.handleSubmit(
-                  type === "sign-in" ? handleSignIn : handleSignUp
-                )}
-                className="space-y-8"
-            >
-              {type === 'sign-up' &&
-              <>
-                <div className="flex flex-row gap-4">
-                  <CustomInput 
-                    control={form.control} 
-                    name={'firstName'} 
-                    label={'First Name'} 
-                    placeholder={'Enter Your First Name'}
-                  />
-                  <CustomInput 
-                    control={form.control} 
-                    name={'lastName'} 
-                    label={'Last Name'} 
-                    placeholder={'Enter your last name'}
-                  />
-                </div>
-                <CustomInput 
-                    control={form.control} 
-                    name={'address'} 
-                    label={'Address'} 
-                    placeholder={'Enter your Address'}
-                  />
-                <CustomInput 
-                  control={form.control} 
-                  name={'city'} 
-                  label={'City'} 
-                  placeholder={'Enter your City'}
+        <form
+          onSubmit={form.handleSubmit(
+            type === "sign-in" ? handleSignIn : handleSignUp
+          )}
+          className="space-y-6"
+        >
+          {type === "sign-up" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CustomInput
+                  control={form.control}
+                  name={"firstName"}
+                  label={"First Name"}
+                  placeholder={"John"}
                 />
-                <div className="flex flex-row gap-4">
-                  <CustomInput 
-                    control={form.control} 
-                    name={'state'} 
-                    label={'State'} 
-                    placeholder={'Ex: NY'}
-                  />
-                  <CustomInput 
-                    control={form.control} 
-                    name={'postalCode'} 
-                    label={'Postal Code'} 
-                    placeholder={'Ex: 91001'}
-                  />
-                </div>
-                <div className="flex flex-row gap-4">
-                  <CustomInput 
-                    control={form.control} 
-                    name={'dateOfBirth'} 
-                    label={'Date of birth'} 
-                    placeholder={'2003-08-06'}
-                  />
-                  <CustomInput 
-                    control={form.control} 
-                    name={'ssn'} 
-                    label={'SSN'} 
-                    placeholder={'Ex: 1234'}
-                  />
-                </div>
-              </>
-              }
-              <CustomInput 
-                control={form.control} 
-                name={'email'} 
-                label={'Email'} 
-                placeholder={'Enter your Username'}
-              />
-              <CustomInput 
-                control={form.control} 
-                name={'password'} 
-                label={'Password'} 
-                placeholder={'Enter your Password'}
-              />
-              <div className="flex flex-col gap-4">
-                <Button type="submit" className="form-btn" disabled={isLoading}>
-                  {isLoading 
-                    ? (
-                      <>
-                        <Loader2 size={20} className="animate-spin"/> &nbsp; Loading...
-                      </>
-                    )
-                    : type === 'sign-in'
-                      ? 'Sign In'
-                      : 'Sign Up'
-                  }
-                </Button>
-
+                <CustomInput
+                  control={form.control}
+                  name={"lastName"}
+                  label={"Last Name"}
+                  placeholder={"Doe"}
+                />
               </div>
+              <CustomInput
+                control={form.control}
+                name={"address"}
+                label={"Address"}
+                placeholder={"123 Main St"}
+              />
+              <CustomInput
+                control={form.control}
+                name={"city"}
+                label={"City"}
+                placeholder={"New York"}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <CustomInput
+                  control={form.control}
+                  name={"state"}
+                  label={"State"}
+                  placeholder={"NY"}
+                />
+                <CustomInput
+                  control={form.control}
+                  name={"postalCode"}
+                  label={"Postal Code"}
+                  placeholder={"10001"}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <CustomInput
+                  control={form.control}
+                  name={"dateOfBirth"}
+                  label={"Date of Birth"}
+                  placeholder={"2000-01-01"}
+                />
+                <CustomInput
+                  control={form.control}
+                  name={"ssn"}
+                  label={"SSN"}
+                  placeholder={"1234"}
+                />
+              </div>
+            </>
+          )}
 
-            </form>
-          </Form>
+          <CustomInput
+            control={form.control}
+            name={"email"}
+            label={"Email"}
+            placeholder={"you@example.com"}
+          />
+          <div className="flex flex-col gap-2">
+            <CustomInput
+              control={form.control}
+              name={"password"}
+              label={"Password"}
+              placeholder={"••••••••"}
+            />
+            {type === "sign-in" && (
+              <Link
+                href={"/forgot-password"}
+                className="form-link hover:underline self-end"
+              >
+                Forgot password?
+              </Link>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="form-btn w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 size={20} className="animate-spin mr-2" /> Processing...
+              </>
+            ) : type === "sign-in" ? (
+              "Sign In"
+            ) : (
+              "Sign Up"
+            )}
+          </Button>
+        </form>
+      </Form>
 
           <footer className="flex justify-center gap-1">
             <p className="text-14 font-normal text-gray-600">
