@@ -380,3 +380,14 @@
     @apply text-16 font-semibold text-black-2 max-xl:hidden;
   }
 }
+
+/* Custom Styles */
+
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
+.animate-wiggle {
+  animation: wiggle 1.9s ease-in-out infinite;
+}

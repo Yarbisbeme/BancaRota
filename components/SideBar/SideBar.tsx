@@ -7,7 +7,7 @@ import Logo from '../Logo'
 import { sidebarLinks } from '@/constants'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
-import { LogoutButton } from '../auth/SignOutBtn'
+import Footer from '../Footer'
 
 const SideBar = ({ user }: SiderbarProps) => {
 
@@ -24,7 +24,7 @@ const SideBar = ({ user }: SiderbarProps) => {
                     height={32} 
                     className='max-lg:size-14'
                 />
-                <h1 className='sidebar-logo'>Horizon</h1>
+                <h1 className='sidebar-logo -ml-2'>Bank</h1>
             </Link>
             {sidebarLinks.map((item) => {
                 const isActive = pathName === item.route || pathName.startsWith(`${item.route}/`);
@@ -51,7 +51,7 @@ const SideBar = ({ user }: SiderbarProps) => {
             User
         </nav>
         Footer
-        <LogoutButton />
+        <Footer user={user}/>
     </section>
   )
 }
